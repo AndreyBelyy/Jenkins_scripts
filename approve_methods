@@ -1,0 +1,36 @@
+import java.lang.reflect.*;
+import jenkins.model.Jenkins;
+import jenkins.model.*;
+import org.jenkinsci.plugins.scriptsecurity.scripts.*;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.*;
+
+scriptApproval = ScriptApproval.get()
+alreadyApproved = new HashSet<>(Arrays.asList(scriptApproval.getApprovedSignatures()))
+
+
+// add all manual whitelist methods here.
+
+approveSignature('method hudson.model.Job getBuildByNumber int')
+approveSignature('method hudson.model.Run getLogFile')
+approveSignature('staticMethod jenkins.model.Jenkins getInstance')
+approveSignature('staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods dropWhile')
+approveSignature('java.util.List groovy.lang.Closure')
+approveSignature('staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods getText java.io.File')
+
+scriptApproval.save()
+
+void approveSignature(String signature) {
+    if (!alreadyApproved.contains(signature)) {
+       scriptApproval.approveSignature(signature)
+    }
+}
+
+// Utility methods
+String printArgumentTypes(Object[] args) {
+    StringBuilder b = new StringBuilder();
+    for (Object arg : args) {
+        b.append(' ');
+        b.append(EnumeratingWhitelist.getName(arg));
+    }
+    return b.toString();
+}
